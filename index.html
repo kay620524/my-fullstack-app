@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的待办事项</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8 font-sans">
+    
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">✨ 终极全栈任务管理器</h1>
+        
+        <div class="mb-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-5 text-white shadow-md">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <p class="text-sm text-blue-100 mb-1">完成进度</p>
+                    <h2 class="text-3xl font-bold"><span id="statCompleted">0</span> <span class="text-lg font-normal opacity-80">/ <span id="statTotal">0</span></span></h2>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-blue-100 mb-1">待办事项</p>
+                    <h2 class="text-2xl font-bold" id="statPending">0</h2>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-blue-100 mb-1">完成率</p>
+                    <h2 class="text-2xl font-bold"><span id="statProgressText">0</span>%</h2>
+                </div>
+            </div>
+            <div class="w-full bg-white/30 rounded-full h-2 mt-4">
+                <div id="statProgressBar" class="bg-white h-2 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="flex justify-center gap-2 mb-6">
+            <button onclick="fetchTasks('全部')" class="px-4 py-1 rounded-full text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition">全部</button>
+            <button onclick="fetchTasks('💻 工作')" class="px-4 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">💻 工作</button>
+            <button onclick="fetchTasks('🏠 生活')" class="px-4 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">🏠 生活</button>
+            <button onclick="fetchTasks('📚 学习')" class="px-4 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">📚 学习</button>
+        </div>
+
+        <div class="mb-6 flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border">
+            <select id="taskCategory" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+                <option value="💻 工作">💻 工作</option>
+                <option value="🏠 生活" selected>🏠 生活</option>
+                <option value="📚 学习">📚 学习</option>
+            </select>
+            <input type="text" id="taskTitle" placeholder="📝 任务内容" class="flex-1 border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="date" id="taskDeadline" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-600">
+            <button onclick="addTask()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition whitespace-nowrap">
+                添加
+            </button>
+        </div>
+
+        <ul id="taskList" class="space-y-3"></ul>
+    </div>
+
+    <script>
+        const API_URL = "https://my-api-server-3ih8.onrender.com/tasks";
+        let currentCategory = '全部'; 
+
+        // 🌟 新增：专门负责更新统计数据的函数
+        function updateDashboard(tasks) {
+            const total = tasks.length;
+            // 使用 filter 过滤出已完成的任务，然后计算数量
+            const completed = tasks.filter(task => task.is_completed).length;
+            const pending = total - completed;
+            // 计算百分比，注意处理除数为0的情况
+            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            // 把算好的数据填入网页对应的标签里
+            document.getElementById("statTotal").innerText = total;
+            document.getElementById("statCompleted").innerText = completed;
+            document.getElementById("statPending").innerText = pending;
+            document.getElementById("statProgressText").innerText = percentage;
+            
+            // 动态改变进度条的 CSS 宽度！
+            document.getElementById("statProgressBar").style.width = `${percentage}%`;
+        }
+
+        async function fetchTasks(category = currentCategory) {
+            currentCategory = category; 
+            let fetchUrl = category !== '全部' ? `${API_URL}?category=${encodeURIComponent(category)}` : API_URL;
+
+            const response = await fetch(fetchUrl);
+            const tasks = await response.json();
+            
+            // 🌟 每次拿到数据，立刻更新看板！
+            updateDashboard(tasks);
+
+            const listElement = document.getElementById("taskList");
+            listElement.innerHTML = ""; 
+            
+            if(tasks.length === 0) {
+                listElement.innerHTML = `<li class="text-gray-400 text-center py-4">该分类下还没有任务哦~</li>`;
+                return;
+            }
+
+            tasks.forEach(task => {
+                const icon = task.is_completed ? "✅" : "⏳";
+                const bgColor = task.is_completed ? "bg-gray-50" : "bg-white";
+                const textStyle = task.is_completed ? "line-through text-gray-400" : "text-gray-800";
+                const btnText = task.is_completed ? "撤销" : "完成";
+                const btnColor = task.is_completed ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-green-100 text-green-700 hover:bg-green-200";
+
+                let deadlineStyle = "text-gray-500";
+                let deadlineText = `截止: ${task.deadline}`;
+                
+                if (task.status === "overdue") {
+                    deadlineStyle = "text-red-600 font-bold";
+                    deadlineText = `🚨 逾期啦: ${task.deadline}`;
+                } else if (task.status === "today") {
+                    deadlineStyle = "text-orange-500 font-bold";
+                    deadlineText = `🔥 今天截止: ${task.deadline}`;
+                }
+                
+                if (task.is_completed) {
+                    deadlineStyle = "text-gray-400 line-through";
+                    deadlineText = `截止: ${task.deadline}`;
+                }
+
+                const item = document.createElement("li");
+                item.className = `flex justify-between items-center p-4 rounded-lg border shadow-sm ${bgColor}`;
+                
+                item.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold ${textStyle}">${icon} ${task.title}</span>
+                            <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full border border-indigo-200">${task.category}</span>
+                        </div>
+                        <p class="text-sm mt-1 ${deadlineStyle}">${deadlineText}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleTask(${task.id})" class="px-3 py-1 rounded text-sm font-bold transition ${btnColor}">
+                            ${btnText}
+                        </button>
+                        <button onclick="deleteTask(${task.id})" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-bold transition">
+                            删除
+                        </button>
+                    </div>
+                `;
+                listElement.appendChild(item);
+            });
+        }
+
+        async function addTask() {
+            const categoryInput = document.getElementById("taskCategory");
+            const titleInput = document.getElementById("taskTitle");
+            const deadlineInput = document.getElementById("taskDeadline");
+            
+            if (!titleInput.value) return alert("任务内容不能为空哦！");
+
+            await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    title: titleInput.value, 
+                    deadline: deadlineInput.value || "无期限",
+                    category: categoryInput.value 
+                })
+            });
+            titleInput.value = ""; deadlineInput.value = "";
+            fetchTasks(currentCategory); 
+        }
+
+        async function toggleTask(taskId) {
+            await fetch(`${API_URL}/${taskId}`, { method: "PUT" });
+            fetchTasks(currentCategory); 
+        }
+
+        async function deleteTask(taskId) {
+            if (confirm("确定删除吗？")) {
+                await fetch(`${API_URL}/${taskId}`, { method: "DELETE" });
+                fetchTasks(currentCategory); 
+            }
+        }
+
+        window.onload = () => fetchTasks('全部');
+    </script>
+</body>
+</html>
