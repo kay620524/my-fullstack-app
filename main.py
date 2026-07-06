@@ -23,7 +23,8 @@ class Task(Base):
     category: Mapped[str] = mapped_column(String(50), default="生活")
 
 
-engine = create_engine("sqlite:///my_tasks.db")
+# engine = create_engine("sqlite:///my_tasks.db")
+engine = create_engine("postgresql://neondb_owner:npg_UuP2F0YpxivD@ep-bitter-bird-ao4ytzpt.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require")
 Base.metadata.create_all(engine)
 
 app = FastAPI(title="我的终极任务管理器 API")
