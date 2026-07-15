@@ -129,27 +129,40 @@
         }
 
         // 登录功能
-        async function login() {
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            const msgBox = document.getElementById('auth-message');
+async function login() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    const msgBox = document.getElementById('auth-message');
 
-            const res = await fetch(`${API_URL}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
-            });
+    try {
+        const res = await fetch(`${API_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p })
+        });
 
-            if (res.ok) {
-                const data = await res.json();
-                // 核心动作：把后端发的 JWT 存进浏览器的保险箱 localStorage
-                localStorage.setItem('access_token', data.access_token);
-                showApp();
-            } else {
-                msgBox.style.color = "red";
-                msgBox.innerText = "账号或密码错误！";
+        // 💡 健壮性防线：如果服务器报错（如 400 或 500），先拿到报错文本
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('access_token', data.access_token);
+            showApp();
+        } else {
+            const errorText = await res.text(); // 改用 text() 接收，防止 json() 解析空内容报错
+            let errorDetail = "登录失败";
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorDetail = errorJson.detail || errorDetail;
+            } catch(e) {
+                errorDetail = errorText || "服务器内部错误";
             }
+            msgBox.style.color = "red";
+            msgBox.innerText = errorDetail;
         }
+    } catch (err) {
+        msgBox.style.color = "red";
+        msgBox.innerText = "无法连接到后端服务器，请检查网络！";
+    }
+}
 
         // --- 📝 业务系统逻辑 (每次请求必须带手环) ---
 
