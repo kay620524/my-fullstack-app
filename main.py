@@ -111,7 +111,7 @@ app.add_middleware(
 
 # ======= 7. 新增的认证接口 (Auth APIs) =======
 
-@app.post("/register", status_code=21)
+@app.post("/register", status_code=201)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # 检查用户名是否被抢注
     existing_user = db.query(UserDB).filter(UserDB.username == user_data.username).first()
