@@ -16,7 +16,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 # 2. 数据库连接（⚠️请把这里替换为你自己的 Neon 真实网址！）
-DATABASE_URL = "postgresql://neondb_owner:npg_UuP2F0YpxivD@ep-bitter-bird-ao4ytzpt.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "postgresql://neondb_owner:npg_jexJpR7s1LNf@ep-bitter-bird-ao4ytzpt.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
