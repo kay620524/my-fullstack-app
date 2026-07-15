@@ -12,7 +12,7 @@ import datetime
 # 1. 基础配置与安全密钥
 SECRET_KEY = "MY_SUPER_SECRET_KEY_12345"  # 现实中这把钥匙要藏好
 ALGORITHM = "HS256"
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 security = HTTPBearer()
 
 # 2. 数据库连接（⚠️请把这里替换为你自己的 Neon 真实网址！）
