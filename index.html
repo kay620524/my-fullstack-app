@@ -3,178 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的待办事项</title>
+    <title>全栈任务管理器 - 私密版</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8 font-sans">
-    
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">✨ 终极全栈任务管理器</h1>
-        
-        <div class="mb-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-5 text-white shadow-md">
-            <div class="flex justify-between items-center mb-2">
+<body class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen font-sans text-gray-800">
+
+    <div id="auth-container" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md transition-all">
+            <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">🔐 欢迎回来</h1>
+
+            <div class="space-y-4">
                 <div>
-                    <p class="text-sm text-blue-100 mb-1">完成进度</p>
-                    <h2 class="text-3xl font-bold"><span id="statCompleted">0</span> <span class="text-lg font-normal opacity-80">/ <span id="statTotal">0</span></span></h2>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                    <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="输入你的专属账号">
                 </div>
-                <div class="text-center">
-                    <p class="text-sm text-blue-100 mb-1">待办事项</p>
-                    <h2 class="text-2xl font-bold" id="statPending">0</h2>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="输入密码 (绝不泄露)">
                 </div>
-                <div class="text-right">
-                    <p class="text-sm text-blue-100 mb-1">完成率</p>
-                    <h2 class="text-2xl font-bold"><span id="statProgressText">0</span>%</h2>
+
+                <div class="flex gap-4 pt-4">
+                    <button onclick="login()" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700 transition">登录</button>
+                    <button onclick="register()" class="flex-1 bg-purple-100 text-purple-700 py-2 rounded-lg font-bold hover:bg-purple-200 transition">注册新号</button>
                 </div>
-            </div>
-            <div class="w-full bg-white/30 rounded-full h-2 mt-4">
-                <div id="statProgressBar" class="bg-white h-2 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                <p id="auth-message" class="text-center text-sm text-red-500 mt-2 font-bold"></p>
             </div>
         </div>
+    </div>
 
-        <div class="flex justify-center gap-2 mb-6">
-            <button onclick="fetchTasks('全部')" class="px-4 py-1 rounded-full text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition">全部</button>
-            <button onclick="fetchTasks('💻 工作')" class="px-4 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">💻 工作</button>
-            <button onclick="fetchTasks('🏠 生活')" class="px-4 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">🏠 生活</button>
-            <button onclick="fetchTasks('📚 学习')" class="px-4 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition">📚 学习</button>
+    <div id="app-container" class="hidden max-w-2xl mx-auto pt-12 px-4 pb-12">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                🚀 我的私密清单
+            </h1>
+            <button onclick="logout()" class="text-sm bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-200">退出登录</button>
         </div>
 
-        <div class="mb-6 flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border">
-            <select id="taskCategory" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+        <div class="bg-white p-6 rounded-2xl shadow-lg mb-8 flex flex-col md:flex-row gap-4">
+            <input type="text" id="task-title" placeholder="✍️ 准备做点什么？" class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+
+            <input type="date" id="task-deadline" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none text-gray-600">
+
+            <select id="task-category" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none">
                 <option value="💻 工作">💻 工作</option>
                 <option value="🏠 生活" selected>🏠 生活</option>
                 <option value="📚 学习">📚 学习</option>
             </select>
-            <input type="text" id="taskTitle" placeholder="📝 任务内容" class="flex-1 border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <input type="date" id="taskDeadline" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-600">
-            <button onclick="addTask()" class="bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition whitespace-nowrap">
+
+            <button onclick="addTask()" class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transform hover:-translate-y-1 transition duration-200">
                 添加
             </button>
         </div>
 
-        <ul id="taskList" class="space-y-3"></ul>
+        <ul id="task-list" class="space-y-4">
+            </ul>
     </div>
 
     <script>
-        const API_URL = "https://my-api-server-3ih8.onrender.com/tasks";
-        let currentCategory = '全部'; 
+        // 🌟 核心：换成你自己的后端真实网址！(千万别加 /tasks，只保留到 .com)
+        const API_URL = "https://my-api-server-3ih8.onrender.com";
 
-        // 🌟 新增：专门负责更新统计数据的函数
-        function updateDashboard(tasks) {
-            const total = tasks.length;
-            // 使用 filter 过滤出已完成的任务，然后计算数量
-            const completed = tasks.filter(task => task.is_completed).length;
-            const pending = total - completed;
-            // 计算百分比，注意处理除数为0的情况
-            const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+        // --- 🔐 认证系统逻辑 ---
 
-            // 把算好的数据填入网页对应的标签里
-            document.getElementById("statTotal").innerText = total;
-            document.getElementById("statCompleted").innerText = completed;
-            document.getElementById("statPending").innerText = pending;
-            document.getElementById("statProgressText").innerText = percentage;
-            
-            // 动态改变进度条的 CSS 宽度！
-            document.getElementById("statProgressBar").style.width = `${percentage}%`;
+        // 获取用户的“数字手环”
+        function getToken() {
+            return localStorage.getItem('access_token');
         }
 
-        async function fetchTasks(category = currentCategory) {
-            currentCategory = category; 
-            let fetchUrl = category !== '全部' ? `${API_URL}?category=${encodeURIComponent(category)}` : API_URL;
+        // 统一配置“带手环的请求头”
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getToken()}` // 出示手环！
+            };
+        }
 
-            const response = await fetch(fetchUrl);
-            const tasks = await response.json();
-            
-            // 🌟 每次拿到数据，立刻更新看板！
-            updateDashboard(tasks);
-
-            const listElement = document.getElementById("taskList");
-            listElement.innerHTML = ""; 
-            
-            if(tasks.length === 0) {
-                listElement.innerHTML = `<li class="text-gray-400 text-center py-4">该分类下还没有任务哦~</li>`;
-                return;
+        // 页面刚加载时，检查是否已经登录过
+        window.onload = function() {
+            if (getToken()) {
+                showApp();
+            } else {
+                showLogin();
             }
+        };
+
+        function showLogin() {
+            document.getElementById('auth-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            fetchTasks(); // 切换到主界面后，立刻拉取数据
+        }
+
+        // 退出登录：撕毁手环
+        function logout() {
+            localStorage.removeItem('access_token');
+            showLogin();
+        }
+
+        // 注册功能
+        async function register() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const msgBox = document.getElementById('auth-message');
+
+            if (!u || !p) return msgBox.innerText = "账号密码不能为空！";
+
+            const res = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+
+            if (res.ok) {
+                msgBox.style.color = "green";
+                msgBox.innerText = "注册成功！请点击登录。";
+            } else {
+                const data = await res.json();
+                msgBox.style.color = "red";
+                msgBox.innerText = data.detail || "注册失败";
+            }
+        }
+
+        // 登录功能
+        async function login() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const msgBox = document.getElementById('auth-message');
+
+            const res = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                // 核心动作：把后端发的 JWT 存进浏览器的保险箱 localStorage
+                localStorage.setItem('access_token', data.access_token);
+                showApp();
+            } else {
+                msgBox.style.color = "red";
+                msgBox.innerText = "账号或密码错误！";
+            }
+        }
+
+        // --- 📝 业务系统逻辑 (每次请求必须带手环) ---
+
+        async function fetchTasks() {
+            const res = await fetch(`${API_URL}/tasks`, {
+                headers: getAuthHeaders() // 给保安看手环
+            });
+            if (res.status === 401) return logout(); // 手环过期，踢回登录页
+
+            const tasks = await res.json();
+            const listElement = document.getElementById('task-list');
+            listElement.innerHTML = ''; // 清空旧列表
 
             tasks.forEach(task => {
-                const icon = task.is_completed ? "✅" : "⏳";
-                const bgColor = task.is_completed ? "bg-gray-50" : "bg-white";
-                const textStyle = task.is_completed ? "line-through text-gray-400" : "text-gray-800";
-                const btnText = task.is_completed ? "撤销" : "完成";
-                const btnColor = task.is_completed ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-green-100 text-green-700 hover:bg-green-200";
+                const li = document.createElement('li');
+                li.className = `flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border-l-4 ${task.is_completed ? 'border-green-400 opacity-60' : 'border-indigo-500'} transition`;
 
-                let deadlineStyle = "text-gray-500";
-                let deadlineText = `截止: ${task.deadline}`;
-                
-                if (task.status === "overdue") {
-                    deadlineStyle = "text-red-600 font-bold";
-                    deadlineText = `🚨 逾期啦: ${task.deadline}`;
-                } else if (task.status === "today") {
-                    deadlineStyle = "text-orange-500 font-bold";
-                    deadlineText = `🔥 今天截止: ${task.deadline}`;
-                }
-                
-                if (task.is_completed) {
-                    deadlineStyle = "text-gray-400 line-through";
-                    deadlineText = `截止: ${task.deadline}`;
-                }
-
-                const item = document.createElement("li");
-                item.className = `flex justify-between items-center p-4 rounded-lg border shadow-sm ${bgColor}`;
-                
-                item.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold ${textStyle}">${icon} ${task.title}</span>
-                            <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full border border-indigo-200">${task.category}</span>
+                li.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <input type="checkbox" ${task.is_completed ? 'checked' : ''} onchange="toggleTask(${task.id})" class="w-6 h-6 text-indigo-600 rounded cursor-pointer">
+                        <div>
+                            <p class="text-lg font-bold ${task.is_completed ? 'line-through text-gray-400' : 'text-gray-800'}">${task.title}</p>
+                            <div class="flex gap-2 text-xs font-semibold mt-1">
+                                <span class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded">${task.category}</span>
+                                <span class="bg-gray-100 text-gray-500 px-2 py-1 rounded">截止: ${task.deadline}</span>
+                            </div>
                         </div>
-                        <p class="text-sm mt-1 ${deadlineStyle}">${deadlineText}</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="toggleTask(${task.id})" class="px-3 py-1 rounded text-sm font-bold transition ${btnColor}">
-                            ${btnText}
-                        </button>
-                        <button onclick="deleteTask(${task.id})" class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-sm font-bold transition">
-                            删除
-                        </button>
-                    </div>
+                    <button onclick="deleteTask(${task.id})" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition">删除</button>
                 `;
-                listElement.appendChild(item);
+                listElement.appendChild(li);
             });
         }
 
         async function addTask() {
-            const categoryInput = document.getElementById("taskCategory");
-            const titleInput = document.getElementById("taskTitle");
-            const deadlineInput = document.getElementById("taskDeadline");
-            
-            if (!titleInput.value) return alert("任务内容不能为空哦！");
+            const title = document.getElementById('task-title').value;
+            const deadline = document.getElementById('task-deadline').value;
+            const category = document.getElementById('task-category').value;
 
-            await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    title: titleInput.value, 
-                    deadline: deadlineInput.value || "无期限",
-                    category: categoryInput.value 
-                })
+            if (!title) return alert("写点什么吧！");
+
+            await fetch(`${API_URL}/tasks`, {
+                method: 'POST',
+                headers: getAuthHeaders(), // 给保安看手环
+                body: JSON.stringify({ title, deadline: deadline || "无期限", category })
             });
-            titleInput.value = ""; deadlineInput.value = "";
-            fetchTasks(currentCategory); 
+
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-deadline').value = '';
+            fetchTasks();
         }
 
-        async function toggleTask(taskId) {
-            await fetch(`${API_URL}/${taskId}`, { method: "PUT" });
-            fetchTasks(currentCategory); 
+        async function toggleTask(id) {
+            await fetch(`${API_URL}/tasks/${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders() // 给保安看手环
+            });
+            fetchTasks();
         }
 
-        async function deleteTask(taskId) {
-            if (confirm("确定删除吗？")) {
-                await fetch(`${API_URL}/${taskId}`, { method: "DELETE" });
-                fetchTasks(currentCategory); 
-            }
+        async function deleteTask(id) {
+            await fetch(`${API_URL}/tasks/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders() // 给保安看手环
+            });
+            fetchTasks();
         }
-
-        window.onload = () => fetchTasks('全部');
     </script>
 </body>
 </html>
